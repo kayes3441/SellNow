@@ -8,15 +8,19 @@ use PDOException;
 class Database {
     private static $instance = null;
     private $conn;
-
-    private $host = '127.0.0.1'; // TODO: Move to env
-    private $db_name = 'sellnow'; 
-    private $username = 'root';
-    private $password = ''; // user might need to change this
+    private $host;
+    private $db_name;
+    private $username;
+    private $password;
 
     private function __construct() {
         // Checking for SQLite first for this assessment
-        $isSqlite = true; // Hardcoded flip for now
+
+        $this->host = getenv('DB_HOST') ?? 'sqlite';
+        $this->db_name = getenv('DB_DATABASE') ?? 'sellnow';
+        $this->username = getenv('DB_USERNAME') ?? 'root';
+        $this->password = getenv('DB_PASSWORD') ?? 'root';
+        $isSqlite =  $this->host === 'sqlite'; // Hardcoded flip for now
 
         try {
             if ($isSqlite) {

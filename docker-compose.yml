@@ -1,0 +1,72 @@
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: sellnow-nginx
+    restart: unless-stopped
+    ports:
+      - "8082:80"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - sellnow-network
+
+  app:
+    image: thecodingmachine/php:8.2-v4-fpm
+    container_name: sellnow-app
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - mysql
+    environment:
+      - DB_HOST=mysql
+      - DB_DATABASE=sellnow
+      - DB_USERNAME=sellnow_user
+      - DB_PASSWORD=sellnow_password
+      - PHP_EXTENSIONS=pdo_mysql gd zip
+      - COMPOSER=1
+    working_dir: /var/www/html
+    networks:
+      - sellnow-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: sellnow-mysql
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: sellnow
+      MYSQL_USER: sellnow_user
+      MYSQL_PASSWORD: sellnow_password
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema-mysql.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    networks:
+      - sellnow-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: sellnow-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: root_password
+    depends_on:
+      - mysql
+    networks:
+      - sellnow-network
+
+volumes:
+  mysql_data:
+
+networks:
+  sellnow-network:
+    driver: bridge
