@@ -21,9 +21,9 @@ $twig->addGlobal('session', $_SESSION);
 
 // Database Connection
 $db = Database::getInstance()->getConnection();
-
+$container = new \SellNow\Container();
 // Initialize Router with dependencies
-$router = new Router($twig, $db);
+$router = new Router($twig, $db,  $container);
 
 // Load routes
 $routeLoader = require __DIR__ . '/../route/web.php';

@@ -3,6 +3,7 @@
 namespace SellNow\Config;
 
 use PDO;
+use SellNow\Container;
 use Twig\Environment;
 
 class Router
@@ -11,11 +12,13 @@ class Router
     private $notFoundHandler;
     private Environment $twig;
     private PDO $db;
-
-    public function __construct(Environment $twig, PDO $db)
+    private Container $container;
+    public function __construct(Environment $twig, PDO $db,  Container $container)
     {
         $this->twig = $twig;
         $this->db = $db;
+        $this->container = $container;
+
     }
 
     public function get(string $path, string|callable $handler): void

@@ -2,15 +2,25 @@
 
 namespace SellNow\Controllers;
 
+use SellNow\Container;
+use SellNow\Contracts\AuthRepositoryInterface;
 
 class AuthController extends Controller
 {
-    public function loginForm()
+    private AuthRepositoryInterface $authRepo;
+
+    public function __construct($twig, $db, $container)
+    {
+        parent::__construct($twig, $db, $container);
+
+        $this->authRepo = $this->repo(AuthRepositoryInterface::class);
+    }
+    public function loginForm():void
     {
         if (isset($_SESSION['user_id'])) {
             $this->redirect('/dashboard');
         }
-        $this->render('auth/login.html.twig');
+        $this->view('auth/login.html.twig');
     }
 
     public function login()
