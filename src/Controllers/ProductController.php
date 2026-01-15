@@ -2,24 +2,14 @@
 
 namespace SellNow\Controllers;
 
-class ProductController
+class ProductController extends Controller
 {
-    private $twig;
-    private $db;
-
-    public function __construct($twig, $db)
-    {
-        $this->twig = $twig;
-        $this->db = $db;
-    }
-
     public function create()
     {
         if (!isset($_SESSION['user_id'])) {
-            header("Location: /login");
-            exit;
+            $this->redirect('/login');
         }
-        echo $this->twig->render('products/add.html.twig');
+        $this->render('products/add.html.twig');
     }
 
     public function store()
@@ -59,7 +49,6 @@ class ProductController
             $filePath
         ]);
 
-        header("Location: /dashboard");
-        exit;
+        $this->redirect('/dashboard');
     }
 }

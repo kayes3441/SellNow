@@ -2,26 +2,15 @@
 
 namespace SellNow\Controllers;
 
-class AuthController
+
+class AuthController extends Controller
 {
-
-    // Imperfect: Manual dependency injection via constructor every time
-    private $twig;
-    private $db;
-
-    public function __construct($twig, $db)
-    {
-        $this->twig = $twig;
-        $this->db = $db;
-    }
-
     public function loginForm()
     {
         if (isset($_SESSION['user_id'])) {
-            header("Location: /dashboard");
-            exit;
+            $this->redirect('/dashboard');
         }
-        echo $this->twig->render('auth/login.html.twig');
+        $this->render('auth/login.html.twig');
     }
 
     public function login()
@@ -37,17 +26,15 @@ class AuthController
         if ($user && $password == $user['password']) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
-            header("Location: /dashboard");
-            exit;
+            $this->redirect('/dashboard');
         } else {
-            header("Location: /login?error=Invalid credentials");
-            exit;
+            $this->redirect('/login?error=Invalid credentials');
         }
     }
 
     public function registerForm()
     {
-        echo $this->twig->render('auth/register.html.twig');
+        $this->render('auth/register.html.twig');
     }
 
     public function register()
@@ -69,16 +56,15 @@ class AuthController
             die("Error registering: " . $e->getMessage());
         }
 
-        header("Location: /login?msg=Registered successfully");
-        exit;
+        $this->redirect('/login?msg=Registered successfully');
     }
 
     public function dashboard()
     {
         if (!isset($_SESSION['user_id']))
-            header("Location: /login");
+            $this->redirect('/login');
 
-        echo $this->twig->render('dashboard.html.twig', [
+        $this->render('dashboard.html.twig', [
             'username' => $_SESSION['username']
         ]);
     }

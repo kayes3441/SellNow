@@ -2,17 +2,9 @@
 
 namespace SellNow\Controllers;
 
-class PublicController
+
+class PublicController extends Controller
 {
-    private $twig;
-    private $db;
-
-    public function __construct($twig, $db)
-    {
-        $this->twig = $twig;
-        $this->db = $db;
-    }
-
     public function profile($username)
     {
         // Raw SQL to find user
@@ -31,7 +23,7 @@ class PublicController
         $pStmt = $this->db->query("SELECT * FROM products WHERE user_id = $user->id");
         $products = $pStmt->fetchAll(\PDO::FETCH_ASSOC);
 
-        echo $this->twig->render('public/profile.html.twig', [
+        $this->render('public/profile.html.twig', [
             'seller' => $user,
             'products' => $products
         ]);

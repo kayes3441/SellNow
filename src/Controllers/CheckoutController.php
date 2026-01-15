@@ -2,23 +2,14 @@
 
 namespace SellNow\Controllers;
 
-class CheckoutController
+
+class CheckoutController extends Controller
 {
-    private $twig;
-    private $db;
-
-    public function __construct($twig, $db)
-    {
-        $this->twig = $twig;
-        $this->db = $db;
-    }
-
     public function index()
     {
         $cart = $_SESSION['cart'] ?? [];
         if (empty($cart)) {
-            header("Location: /cart");
-            exit;
+            $this->redirect('/cart');
         }
 
         $total = 0;
@@ -28,7 +19,7 @@ class CheckoutController
 
         $providers = ['Stripe', 'PayPal', 'Razorpay'];
 
-        echo $this->twig->render('checkout/index.html.twig', [
+        $this->render('checkout/index.html.twig', [
             'total' => $total,
             'providers' => $providers
         ]);
@@ -41,8 +32,7 @@ class CheckoutController
 
         // Check cart not empty just in case
         if (empty($_SESSION['cart'])) {
-            header("Location: /cart");
-            exit;
+            $this->redirect('/cart');
         }
 
         // Calculate total again? Or pass it?
@@ -52,21 +42,19 @@ class CheckoutController
             $total += $item['price'] * $item['quantity'];
         }
 
-        header("Location: /payment?provider=$provider&total=$total");
-        exit;
+        $this->redirect("/payment?provider=$provider&total=$total");
     }
 
     public function payment()
     {
         if (empty($_SESSION['cart'])) {
-            header("Location: /cart");
-            exit;
+            $this->redirect('/cart');
         }
 
         $provider = $_GET['provider'] ?? 'Test';
         $total = $_GET['total'] ?? 0;
 
-        echo $this->twig->render('checkout/payment.html.twig', [
+        $this->render('checkout/payment.html.twig', [
             'provider' => $provider,
             'total' => $total
         ]);
@@ -85,7 +73,7 @@ class CheckoutController
 
         unset($_SESSION['cart']);
 
-        echo $this->twig->render('layouts/base.html.twig', [
+        $this->render('layouts/base.html.twig', [
             'content' => "<h1>Thank you for your purchase!</h1><p>Payment via $provider successful.</p><a href='/dashboard' class='btn btn-primary'>Go to Dashboard</a>"
         ]);
     }

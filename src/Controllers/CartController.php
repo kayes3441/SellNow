@@ -2,17 +2,9 @@
 
 namespace SellNow\Controllers;
 
-class CartController
+
+class CartController extends Controller
 {
-    private $twig;
-    private $db;
-
-    public function __construct($twig, $db)
-    {
-        $this->twig = $twig;
-        $this->db = $db;
-    }
-
     public function index()
     {
         $cart = $_SESSION['cart'] ?? [];
@@ -21,7 +13,7 @@ class CartController
             $total += $item['price'] * $item['quantity'];
         }
 
-        echo $this->twig->render('cart/index.html.twig', [
+        $this->render('cart/index.html.twig', [
             'cart' => $cart,
             'total' => $total
         ]);
@@ -57,7 +49,6 @@ class CartController
     public function clear()
     {
         unset($_SESSION['cart']);
-        header("Location: /cart");
-        exit;
+        $this->redirect('/cart');
     }
 }
