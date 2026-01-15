@@ -9,18 +9,16 @@ class AuthController extends Controller
 {
     private AuthRepositoryInterface $authRepo;
 
-    public function __construct($twig, $db, $container)
+    public function __construct( Container $container)
     {
-        parent::__construct($twig, $db, $container);
-
-        $this->authRepo = $this->repo(AuthRepositoryInterface::class);
+        $this->authRepo = $container->resolve(AuthRepositoryInterface::class);
     }
     public function loginForm():void
     {
         if (isset($_SESSION['user_id'])) {
             $this->redirect('/dashboard');
         }
-        $this->view('auth/login.html.twig');
+        $this->render('auth/login.html.twig');
     }
 
     public function login()

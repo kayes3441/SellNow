@@ -2,24 +2,10 @@
 
 namespace SellNow\Config;
 
-use PDO;
-use SellNow\Container;
-use Twig\Environment;
-
 class Router
 {
     private array $routes = [];
     private $notFoundHandler;
-    private Environment $twig;
-    private PDO $db;
-    private Container $container;
-    public function __construct(Environment $twig, PDO $db,  Container $container)
-    {
-        $this->twig = $twig;
-        $this->db = $db;
-        $this->container = $container;
-
-    }
 
     public function get(string $path, string|callable $handler): void
     {
@@ -61,7 +47,7 @@ class Router
             }
 
             $pattern = $this->convertToRegex($route['path']);
-            
+
             if (preg_match($pattern, $uri, $matches)) {
                 array_shift($matches);
                 $this->executeHandler($route['handler'], $matches);
@@ -87,11 +73,23 @@ class Router
         // Handle "Controller@method" syntax
         if (is_string($handler) && str_contains($handler, '@')) {
             [$controllerClass, $method] = explode('@', $handler);
-            
+
             $fullClass = "SellNow\\Controllers\\{$controllerClass}";
-            
+
             if (class_exists($fullClass)) {
-                $controller = new $fullClass($this->twig, $this->db);
+                // Check if controller needs Container (has custom constructor)
+                $reflection = new \ReflectionClass($fullClass);
+                $constructor = $reflection->getConstructor();
+
+                if ($constructor && $constructor->getNumberOfParameters() > 0) {
+                    // Controller has custom constructor, pass Container
+                    $container = new \SellNow\Container();
+                    $controller = new $fullClass($container);
+                } else {
+                    // Controller uses default constructor
+                    $controller = new $fullClass();
+                }
+
                 call_user_func_array([$controller, $method], $params);
                 return;
             }

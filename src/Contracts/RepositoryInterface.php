@@ -11,7 +11,7 @@ interface RepositoryInterface
      * @param int|string $id
      * @return Model|null
      */
-    public function findById(int|string $id): ?Model;
+    public function findById(int|string $id): ?array;
 
     /**
      * @param array $params

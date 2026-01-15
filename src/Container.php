@@ -3,12 +3,14 @@
 namespace SellNow;
 
 use Exception;
+use SellNow\Contracts\AuthRepositoryInterface;
 use SellNow\Contracts\UserRepositoryInterface;
 use SellNow\Contracts\ProductRepositoryInterface;
 use SellNow\Contracts\OrderRepositoryInterface;
 use SellNow\Contracts\CartRepositoryInterface;
 use SellNow\Contracts\PaymentProviderRepositoryInterface;
 
+use SellNow\Repositories\AuthRepository;
 use SellNow\Repositories\UserRepository;
 use SellNow\Repositories\ProductRepository;
 use SellNow\Repositories\OrderRepository;
@@ -32,6 +34,7 @@ class Container
      */
     private function registerRepositories(): void
     {
+        $this->bind(AuthRepositoryInterface::class, AuthRepository::class);
         $this->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->bind(ProductRepositoryInterface::class, ProductRepository::class);
         $this->bind(OrderRepositoryInterface::class, OrderRepository::class);
