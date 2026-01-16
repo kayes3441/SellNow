@@ -18,7 +18,7 @@ interface RepositoryInterface
      * @param array $relations
      * @return Model|null
      */
-    public function getFirstWhere(array $params, array $relations = []): ?Model;
+    public function getFirstWhere(array $params, array $relations = []): ?array;
 
 
     /**
@@ -28,7 +28,7 @@ interface RepositoryInterface
      * @param array $relations
      * @return Model|null
      */
-    public function getListWhere(array $orderBy = [], string $searchValue = null, array $filters = [], array $relations =[]):?Model;
+    public function getListWhere(array $orderBy = [], string $searchValue = null, array $filters = [], array $relations =[]):?array;
 
     /**
      * @param array $data

@@ -19,12 +19,12 @@ class AuthRepository implements AuthRepositoryInterface
       return  $this->user->find($id);
     }
 
-    public function getFirstWhere(array $params, array $relations = []): ?Model
+    public function getFirstWhere(array $params, array $relations = []): ?array
     {
         // TODO: Implement getFirstWhere() method.
     }
 
-    public function getListWhere(array $orderBy = [], string $searchValue = null, array $filters = [], array $relations = []): ?Model
+    public function getListWhere(array $orderBy = [], string $searchValue = null, array $filters = [], array $relations = []): ?array
     {
         // TODO: Implement getListWhere() method.
     }

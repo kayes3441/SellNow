@@ -8,17 +8,17 @@ use SellNow\Models\Model;
 class ProductRepository  implements ProductRepositoryInterface
 {
 
-    public function findById(int|string $id): ?Model
+    public function findById(int|string $id): array
     {
         // TODO: Implement findById() method.
     }
 
-    public function getFirstWhere(array $params, array $relations = []): ?Model
+    public function getFirstWhere(array $params, array $relations = []): array
     {
         // TODO: Implement getFirstWhere() method.
     }
 
-    public function getListWhere(array $orderBy = [], string $searchValue = null, array $filters = [], array $relations = []): ?Model
+    public function getListWhere(array $orderBy = [], string $searchValue = null, array $filters = [], array $relations = []): array
     {
         // TODO: Implement getListWhere() method.
     }
