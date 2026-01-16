@@ -3,6 +3,7 @@
 namespace SellNow\Controllers;
 
 use SellNow\Contracts\AuthRepositoryInterface;
+use SellNow\Services\AuthService;
 
 class AuthController extends Controller
 {
@@ -10,6 +11,7 @@ class AuthController extends Controller
 
     public function __construct(
         public AuthRepositoryInterface $authRepo,
+        public AuthService $authService
     )
     {
     }
@@ -18,40 +20,36 @@ class AuthController extends Controller
         if (isset($_SESSION['user_id'])) {
             $this->redirect('/dashboard');
         }
-        $this->render('auth/login.html.twig');
+        $this->renderWithFlash('auth/login.html.twig');
     }
 
-    public function login()
+    public function login():void
     {
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
 
-        // Raw SQL, no Model
-        $stmt = $this->db->prepare("SELECT * FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        $user = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-        if ($user && $password == $user['password']) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            $this->redirect('/dashboard');
+        $user = $this->authRepo->findByParams(params: ['email' => $email]);
+        
+        if ($user && password_verify($password, $user['password'])) {
+            $this->authService->addUserDataInSession(userData: $user);
+            $this->redirectWithSuccess(url:'/dashboard', message: 'Welcome back!');
         } else {
-            $this->redirect('/login?error=Invalid credentials');
+            $this->redirectWithError(url:'/login', message: 'Invalid email or password');
         }
     }
 
-    public function registerForm()
+    public function registerForm():void
     {
         $this->render('auth/register.html.twig');
     }
 
-    public function register()
+    public function register():void
     {
         if (empty($_POST['email']) || empty($_POST['password']))
             die("Fill all fields");
 
         // Raw SQL
-        $sql = "INSERT INTO users (email, username, Full_Name, password) VALUES (?, ?, ?, ?)";
+        $sql = "INSERT INTO users (email, username, full_Name, password) VALUES (?, ?, ?, ?)";
         $stmt = $this->db->prepare($sql);
         try {
             $stmt->execute([

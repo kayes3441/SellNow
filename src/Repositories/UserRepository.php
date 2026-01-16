@@ -13,13 +13,13 @@ class UserRepository implements UserRepositoryInterface
         // TODO: Implement findById() method.
     }
 
-    public function getFirstWhere(array $params, array $relations = []): array
+    public function findByParams(array $params, array $relations = []): array
     {
-        // TODO: Implement getFirstWhere() method.
+        // TODO: Implement findByParams() method.
     }
     public function getListByParams(array $params, array $relations = []): array
     {
-        // TODO: Implement getFirstWhere() method.
+        // TODO: Implement findByParams() method.
     }
     public function getListWhere(array $orderBy = [], string $searchValue = null, array $filters = [], array $relations = []): array
     {

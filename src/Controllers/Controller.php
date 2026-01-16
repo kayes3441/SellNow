@@ -4,9 +4,12 @@ namespace SellNow\Controllers;
 
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
+use SellNow\Traits\HandlesResponse;
 
 abstract class Controller
 {
+    use HandlesResponse;
+
     protected function redirect(string $url): void
     {
         header("Location: {$url}");

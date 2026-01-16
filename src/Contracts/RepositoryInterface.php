@@ -18,7 +18,7 @@ interface RepositoryInterface
      * @param array $relations
      * @return Model|null
      */
-    public function getFirstWhere(array $params, array $relations = []): ?array;
+    public function findByParams(array $params, array $relations = []): ?array;
 
 
     /**

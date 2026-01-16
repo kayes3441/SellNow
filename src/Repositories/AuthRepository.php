@@ -19,9 +19,9 @@ class AuthRepository implements AuthRepositoryInterface
       return  $this->user->find($id);
     }
 
-    public function getFirstWhere(array $params, array $relations = []): ?array
+    public function findByParams(array $params, array $relations = []): ?array
     {
-        // TODO: Implement getFirstWhere() method.
+        return $this->user->findBy(array_keys($params)[0], array_values($params)[0]);
     }
 
     public function getListWhere(array $orderBy = [], string $searchValue = null, array $filters = [], array $relations = []): ?array

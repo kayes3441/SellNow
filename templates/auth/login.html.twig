@@ -7,13 +7,7 @@
     <div class="col-md-6">
         <h2>Login</h2>
         
-        <!-- Imperfect: using GET param directly -->
-        {% if get_error is defined %} 
-             <!-- This won't work because I didn't pass it from controller properly yet, 
-                  I passed it via URL param but didn't extract it to twig context.
-                  Candidates should spot this. -->
-             <div class="alert alert-danger">{{ get_error }}</div>
-        {% endif %}
+        {% include 'components/flash-messages.html.twig' %}
 
         <form action="/login" method="POST">
             <div class="mb-3">
