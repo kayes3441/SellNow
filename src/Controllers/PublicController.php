@@ -2,30 +2,38 @@
 
 namespace SellNow\Controllers;
 
+use SellNow\Contracts\UserRepositoryInterface;
+use SellNow\Contracts\ProductRepositoryInterface;
+use SellNow\Services\PublicService;
 
 class PublicController extends Controller
 {
-    public function profile($username)
+    public function __construct(
+        private UserRepositoryInterface $userRepo,
+        private ProductRepositoryInterface $productRepo,
+        private PublicService $publicService
+    )
     {
-        // Raw SQL to find user
-        // Imperfect: Inefficient separate queries
-        $stmt = $this->db->prepare("SELECT * FROM users WHERE username = :u");
-        $stmt->execute(['u' => $username]);
-        $user = $stmt->fetch(\PDO::FETCH_OBJ);
+    }
+
+    public function profile($username): void
+    {
+        $user = $this->userRepo->findByParams(['username' => $username]);
 
         if (!$user) {
-            echo "User not found";
+            $this->renderWithFlash('public/404.html.twig', [
+                'message' => 'User not found'
+            ]);
             return;
         }
 
-        // Raw SQL to find products
-        // Imperfect: SQL Injection possible if $user->id was tainted? (It's not here but shows intent)
-        $pStmt = $this->db->query("SELECT * FROM products WHERE user_id = $user->id");
-        $products = $pStmt->fetchAll(\PDO::FETCH_ASSOC);
+        $products = $this->productRepo->getListWhere(
+            orderBy: ['created_at' => 'DESC'],
+            filters: ['user_id' => $user['id'], 'is_active' => 1]
+        );
 
-        $this->render('public/profile.html.twig', [
-            'seller' => $user,
-            'products' => $products
-        ]);
+        $profileData = $this->publicService->prepareProfileData($user, $products);
+
+        $this->renderWithFlash('public/profile.html.twig', $profileData);
     }
 }

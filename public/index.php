@@ -6,8 +6,8 @@ require_once __DIR__ . '/../vendor/autoload.php';
 $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();
 
+use SellNow\Config\Container;
 use SellNow\Config\Router;
-use SellNow\Container;
 
 // Start session
 session_start();

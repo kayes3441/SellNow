@@ -2,13 +2,13 @@
 
 namespace SellNow\Controllers;
 
-use SellNow\Contracts\AuthRepositoryInterface;
+ use SellNow\Repositories\UserRepository;
 use SellNow\Services\AuthService;
 
 class AuthController extends Controller
 {
     public function __construct(
-        public AuthRepositoryInterface $authRepo,
+        public UserRepository $userRepo,
         public AuthService $authService
     )
     {
@@ -25,7 +25,7 @@ class AuthController extends Controller
     {
         $data = $this->only(['email', 'password']);
 
-        $user = $this->authRepo->findByParams(['email' => $data['email']]);
+        $user = $this->userRepo->findByParams(['email' => $data['email']]);
         
         if ($user && password_verify($data['password'], $user['password'])) {
             $this->authService->addUserDataInSession($user);
@@ -51,19 +51,19 @@ class AuthController extends Controller
             $this->redirectWithError('/register', 'Please fill all required fields');
             return;
         }
-        $existingUser = $this->authRepo->findByParams(['email' => $data['email']]);
+        $existingUser = $this->userRepo->findByParams(['email' => $data['email']]);
         if ($existingUser) {
             $this->redirectWithError('/register', 'Email already registered');
             return;
         }
-        $existingUsername = $this->authRepo->findByParams(['username' => $data['username']]);
+        $existingUsername = $this->userRepo->findByParams(['username' => $data['username']]);
         if ($existingUsername) {
             $this->redirectWithError('/register', 'Username already taken');
             return;
         }
 
         try {
-            $this->authRepo->add($this->authService->getAddData($data));
+            $this->userRepo->add($this->authService->getAddData($data));
             $this->redirectWithSuccess('/login', 'Registration successful! Please login.');
         } catch (\Exception $e) {
             $this->redirectWithError('/register', 'Registration failed. Please try again.');

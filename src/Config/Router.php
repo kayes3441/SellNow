@@ -2,8 +2,6 @@
 
 namespace SellNow\Config;
 
-use SellNow\Container;
-
 class Router
 {
     private array $routes = [];
