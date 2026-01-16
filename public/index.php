@@ -7,12 +7,14 @@ $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();
 
 use SellNow\Config\Router;
+use SellNow\Container;
 
 // Start session
 session_start();
 
-// Initialize Router
-$router = new Router();
+// Initialize Container and Router
+$container = new Container();
+$router = new Router($container);
 
 // Load routes
 $routeLoader = require __DIR__ . '/../route/web.php';

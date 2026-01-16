@@ -2,10 +2,18 @@
 
 namespace SellNow\Config;
 
+use SellNow\Container;
+
 class Router
 {
     private array $routes = [];
     private $notFoundHandler;
+    private Container $container;
+
+    public function __construct(Container $container)
+    {
+        $this->container = $container;
+    }
 
     public function get(string $path, string|callable $handler): void
     {
@@ -77,19 +85,8 @@ class Router
             $fullClass = "SellNow\\Controllers\\{$controllerClass}";
 
             if (class_exists($fullClass)) {
-                // Check if controller needs Container (has custom constructor)
-                $reflection = new \ReflectionClass($fullClass);
-                $constructor = $reflection->getConstructor();
-
-                if ($constructor && $constructor->getNumberOfParameters() > 0) {
-                    // Controller has custom constructor, pass Container
-                    $container = new \SellNow\Container();
-                    $controller = new $fullClass($container);
-                } else {
-                    // Controller uses default constructor
-                    $controller = new $fullClass();
-                }
-
+                // Use Container to build controller with automatic dependency injection
+                $controller = $this->container->build($fullClass);
                 call_user_func_array([$controller, $method], $params);
                 return;
             }

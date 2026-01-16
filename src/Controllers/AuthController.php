@@ -2,16 +2,16 @@
 
 namespace SellNow\Controllers;
 
-use SellNow\Container;
 use SellNow\Contracts\AuthRepositoryInterface;
 
 class AuthController extends Controller
 {
-    private AuthRepositoryInterface $authRepo;
 
-    public function __construct( Container $container)
+
+    public function __construct(
+        public AuthRepositoryInterface $authRepo,
+    )
     {
-        $this->authRepo = $container->resolve(AuthRepositoryInterface::class);
     }
     public function loginForm():void
     {

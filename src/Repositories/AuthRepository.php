@@ -9,14 +9,14 @@ use SellNow\Models\User;
 class AuthRepository implements AuthRepositoryInterface
 {
     public function __construct(
-//        public User $user,
+        public User $user,
     )
     {
 
     }
     public function findById(int|string $id): ?array
     {
-//      return  $this->user->find($id);
+      return  $this->user->find($id);
     }
 
     public function getFirstWhere(array $params, array $relations = []): ?Model
