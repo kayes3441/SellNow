@@ -5,6 +5,24 @@ namespace SellNow\Traits;
 trait HandlesResponse
 {
     /**
+     * Get only specified fields from request data
+     */
+    protected function only(array $keys, array $source = null): array
+    {
+        $source = $source ?? $_POST;
+        return array_intersect_key($source, array_flip($keys));
+    }
+
+    /**
+     * Get request data except specified fields
+     */
+    protected function except(array $keys, array $source = null): array
+    {
+        $source = $source ?? $_POST;
+        return array_diff_key($source, array_flip($keys));
+    }
+
+    /**
      * Redirect with success message
      */
     protected function redirectWithSuccess(string $url, string $message): void

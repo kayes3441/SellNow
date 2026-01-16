@@ -29,9 +29,9 @@ class AuthRepository implements AuthRepositoryInterface
         // TODO: Implement getListWhere() method.
     }
 
-    public function add(array $data): string|object
+    public function add(array $data): string
     {
-        // TODO: Implement add() method.
+        return $this->user->create($data);
     }
 
     public function update(int $id, array $data): bool
