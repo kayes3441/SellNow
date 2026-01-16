@@ -2,79 +2,161 @@
 
 namespace SellNow\Controllers;
 
+use SellNow\Contracts\CartRepositoryInterface;
+use SellNow\Contracts\OrderRepositoryInterface;
+use SellNow\Contracts\PaymentProviderRepositoryInterface;
+use SellNow\Services\CartService;
+use SellNow\Services\CheckoutService;
+use SellNow\Services\OrderService;
 
 class CheckoutController extends Controller
 {
-    public function index()
+    public function __construct(
+        private CartRepositoryInterface $cartRepo,
+        private OrderRepositoryInterface $orderRepo,
+        private PaymentProviderRepositoryInterface $paymentProviderRepo,
+        private CheckoutService $checkoutService,
+        private CartService $cartService,
+        private OrderService $orderService,
+    )
     {
-        $cart = $_SESSION['cart'] ?? [];
+    }
+
+    public function index(): void
+    {
+        if (!isset($_SESSION['user_id'])) {
+            $this->redirectWithError('/login', 'Please login to checkout');
+            return;
+        }
+        $userId = $_SESSION['user_id'];
+        $sessionId = session_id();
+
+        if ($userId) {
+            $cart = $this->cartRepo->findByParams(['user_id' =>$userId]);
+        } else {
+            $cart = $this->cartRepo->findByParams(['session_id' =>$sessionId]);
+        }
+
         if (empty($cart)) {
-            $this->redirect('/cart');
+            $this->redirectWithInfo('/cart', 'Your cart is empty');
+            return;
         }
 
-        $total = 0;
-        foreach ($cart as $item) {
-            $total += $item['price'] * $item['quantity'];
-        }
+        $total = $this->cartService->getCartTotal($cart);
 
-        $providers = ['Stripe', 'PayPal', 'Razorpay'];
+        $providers = $this->paymentProviderRepo->getListWhere(filters:['is_active' => 1]);
 
-        $this->render('checkout/index.html.twig', [
+        $this->renderWithFlash('checkout/index.html.twig', [
+            'cart' => $cart,
             'total' => $total,
             'providers' => $providers
         ]);
     }
 
-    public function process()
+    public function process(): void
     {
-        // Redirect to mock payment page instead of finishing
-        $provider = $_POST['provider'] ?? 'Unknown';
-
-        // Check cart not empty just in case
-        if (empty($_SESSION['cart'])) {
-            $this->redirect('/cart');
+        if (!isset($_SESSION['user_id'])) {
+            $this->redirectWithError('/login', 'Please login to checkout');
+            return;
         }
 
-        // Calculate total again? Or pass it?
-        // Let's pass via query string (Insecure! Perfect for assessment)
-        $total = 0;
-        foreach ($_SESSION['cart'] as $item) {
-            $total += $item['price'] * $item['quantity'];
-        }
+        $userId = $_SESSION['user_id'];
+        $sessionId = session_id();
+        $data = $this->only(['provider']);
 
-        $this->redirect("/payment?provider=$provider&total=$total");
+        if ($userId) {
+            $cart = $this->cartRepo->findByParams(['user_id' =>$userId]);
+        } else {
+            $cart = $this->cartRepo->findByParams(['session_id' =>$sessionId]);
+        }
+        $errors = $this->checkoutService->validateCheckoutData($cart, $data['provider'] ?? null);
+        if (!empty($errors)) {
+            $this->redirectWithError('/checkout', implode(', ', $errors));
+            return;
+        }
+        $total = $this->cartService->getCartTotal($cart);
+
+
+        $_SESSION['checkout_data'] = [
+            'provider' => $data['provider'],
+            'total' => $total,
+            'cart' => $cart
+        ];
+
+        $this->redirect('/payment');
     }
 
-    public function payment()
+    public function payment(): void
     {
-        if (empty($_SESSION['cart'])) {
-            $this->redirect('/cart');
+        if (!isset($_SESSION['user_id'])) {
+            $this->redirectWithError('/login', 'Please login to continue');
+            return;
         }
+        if (!isset($_SESSION['checkout_data'])) {
+            $this->redirectWithError('/checkout', 'Invalid checkout session');
+            return;
+        }
+        $checkoutData = $_SESSION['checkout_data'];
 
-        $provider = $_GET['provider'] ?? 'Test';
-        $total = $_GET['total'] ?? 0;
-
-        $this->render('checkout/payment.html.twig', [
-            'provider' => $provider,
-            'total' => $total
+        $this->renderWithFlash('checkout/payment.html.twig', [
+            'provider' => $checkoutData['provider'],
+            'total' => $checkoutData['total']
         ]);
     }
 
-    public function success()
+    public function success(): void
     {
-        $provider = $_POST['provider'] ?? 'Unknown';
+        if (!isset($_SESSION['user_id'])) {
+            $this->redirectWithError('/login', 'Please login to continue');
+            return;
+        }
 
-        $logFile = __DIR__ . '/../../storage/logs/transactions.log';
-        if (!is_dir(dirname($logFile)))
-            mkdir(dirname($logFile), 0777, true);
+        if (!isset($_SESSION['checkout_data'])) {
+            $this->redirectWithError('/checkout', 'Invalid checkout session');
+            return;
+        }
 
-        $data = date('Y-m-d H:i:s') . " - Order processed via $provider - User: " . ($_SESSION['user_id'] ?? 'Guest') . "\n";
-        file_put_contents($logFile, $data, FILE_APPEND);
+        $userId = $_SESSION['user_id'];
+        $checkoutData = $_SESSION['checkout_data'];
 
-        unset($_SESSION['cart']);
+        $db = \SellNow\Config\Database::getInstance()->getConnection();
 
-        $this->render('layouts/base.html.twig', [
-            'content' => "<h1>Thank you for your purchase!</h1><p>Payment via $provider successful.</p><a href='/dashboard' class='btn btn-primary'>Go to Dashboard</a>"
-        ]);
+        try {
+            $db->beginTransaction();
+
+            foreach ($checkoutData['cart'] as $item) {
+                $orderData = $this->orderService->getOrderData(
+                    $item['product_id'],
+                    $userId,
+                    $item['price'] * $item['quantity'],
+                    $checkoutData['provider']
+                );
+
+                $orderId = $this->orderRepo->add($orderData);
+
+                $this->orderRepo->update($orderId, ['payment_status' => 'completed']);
+
+                $this->checkoutService->logTransaction(
+                    $orderData['transaction_id'],
+                    $checkoutData['provider'],
+                    $userId,
+                    $orderData['total_amount']
+                );
+                
+                $this->cartRepo->delete($item['id']);
+            }
+
+            $db->commit();
+            unset($_SESSION['checkout_data']);
+
+            $this->renderWithFlash('checkout/success.html.twig', [
+                'provider' => $checkoutData['provider'],
+                'total' => $checkoutData['total']
+            ]);
+
+        } catch (\Exception $e) {
+            $db->rollBack();
+            $this->redirectWithError('/checkout', 'Payment processing failed. Please try again.');
+        }
     }
 }

@@ -22,9 +22,9 @@ class CartController extends Controller
         $sessionId = session_id();
 
         if ($userId) {
-            $cart = $this->cartRepo->getListWhere(['user_id' =>$userId]);
+            $cart = $this->cartRepo->findByParams(['user_id' =>$userId]);
         } else {
-            $cart = $this->cartRepo->getListWhere(['session_id' =>$sessionId]);
+            $cart = $this->cartRepo->findByParams(['session_id' =>$sessionId]);
         }
 
         $total = $this->cartService->getCartTotal($cart);
@@ -92,9 +92,9 @@ class CartController extends Controller
         $userId = $_SESSION['user_id'] ?? null;
         $sessionId = session_id();
         if ($userId) {
-            $cart = $this->cartRepo->getListWhere(['user_id' =>$userId]);
+            $cart = $this->cartRepo->findByParams(['user_id' =>$userId]);
         } else {
-            $cart = $this->cartRepo->getListWhere(['session_id' =>$sessionId]);
+            $cart = $this->cartRepo->findByParams(['session_id' =>$sessionId]);
         }
         $this->cartRepo->delete($cart['id']);
         $this->redirectWithSuccess('/cart', 'Cart cleared successfully');

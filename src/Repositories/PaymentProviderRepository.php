@@ -3,38 +3,44 @@
 namespace SellNow\Repositories;
 
 use SellNow\Contracts\PaymentProviderRepositoryInterface;
-use SellNow\Models\Model;
+use SellNow\Models\PaymentProvider;
 
 class PaymentProviderRepository implements PaymentProviderRepositoryInterface
 {
-
-    public function findById(int|string $id): array
+    public function __construct(
+        public PaymentProvider $paymentProvider,
+    )
     {
-        // TODO: Implement findById() method.
+
+    }
+    public function findById(int|string $id): ?array
+    {
+        return $this->paymentProvider->find($id);
     }
 
-    public function findByParams(array $params, array $relations = []): array
+    public function findByParams(array $params, array $relations = []): ?array
     {
-        // TODO: Implement findByParams() method.
+        return $this->paymentProvider->findBy(array_keys($params)[0], array_values($params)[0]);
     }
 
     public function getListWhere(array $orderBy = [], string $searchValue = null, array $filters = [], array $relations = []): array
     {
-        // TODO: Implement getListWhere() method.
+        return $this->paymentProvider->whereUsingArray($filters);
+
     }
 
-    public function add(array $data): string|object
+    public function add(array $data): string
     {
-        // TODO: Implement add() method.
+        return $this->paymentProvider->create($data);
     }
 
     public function update(int $id, array $data): bool
     {
-        // TODO: Implement update() method.
+        return $this->paymentProvider->updateById($id, $data);
     }
 
     public function delete(int $id): bool
     {
-        // TODO: Implement delete() method.
+        return $this->paymentProvider->destroy($id);
     }
 }
