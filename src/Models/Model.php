@@ -49,7 +49,27 @@ abstract class Model
         $stmt->execute([$value]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public static function whereUsingArray(array $conditions): array
+    {
+        $instance = new static();
 
+        $columns = [];
+        $values  = [];
+
+        foreach ($conditions as $column => $value) {
+            $columns[] = "{$column} = ?";
+            $values[]  = $value;
+        }
+
+        $whereSql = implode(' AND ', $columns);
+
+        $sql = "SELECT * FROM " . static::$table . " WHERE {$whereSql}";
+
+        $stmt = $instance->db->prepare($sql);
+        $stmt->execute($values);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
     public static function create(array $data): int
     {
         $instance = new static();
