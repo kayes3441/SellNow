@@ -16,9 +16,9 @@
             <div class="mb-3">
                 {% for provider in providers %}
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="provider" value="{{ provider }}" id="prov_{{ loop.index }}" required>
+                    <input class="form-check-input" type="radio" name="provider" value="{{ provider['id'] }}" id="prov_{{ loop.index }}" required>
                     <label class="form-check-label" for="prov_{{ loop.index }}">
-                        {{ provider }}
+                        {{ provider['provider_name'] }}
                     </label>
                 </div>
                 {% endfor %}

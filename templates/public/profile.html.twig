@@ -7,7 +7,6 @@
     <h1>{{ seller.full_name }} <small class="text-muted">(@{{ seller.username }})</small></h1>
     <p>Welcome to my shop.</p>
 </div>
-
 <div class="row">
     {% for product in products %}
     <div class="col-md-4 mb-4">
@@ -22,7 +21,7 @@
                 <h5 class="card-title">{{ product.title }}</h5>
                 <p class="card-text">${{ product.price }}</p>
                 <button class="btn btn-success add-to-cart" 
-                        data-id="{{ product.product_id }}" 
+                        data-id="{{ product.id }}"
                         data-title="{{ product.title }}"
                         data-price="{{ product.price }}">
                     Add to Cart
@@ -42,18 +41,19 @@
     // jQuery for Add to Cart intentionally mixed in template
     $(document).ready(function() {
         $('.add-to-cart').click(function() {
-            var btn = $(this);
-            var id = btn.data('id');
+            let btn = $(this);
+            let id = btn.data('id');
             // Imperfection: No AJAX endpoint properly defined yet, will implement next
             $.post('/cart/add', {
                 product_id: id,
                 quantity: 1
             }, function(response) {
+                console.log(response)
                 alert("Added to cart!");
                 // refresh page is ugly but works
                 location.reload();
             }).fail(function() {
-                alert("Failed to add to cart"); 
+                alert("Failed to add to cart");
             });
         });
     });

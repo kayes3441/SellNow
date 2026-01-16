@@ -32,9 +32,9 @@ class CheckoutController extends Controller
         $sessionId = session_id();
 
         if ($userId) {
-            $cart = $this->cartRepo->findByParams(['user_id' =>$userId]);
+            $cart = $this->cartRepo->getListWhere(['user_id' =>$userId]);
         } else {
-            $cart = $this->cartRepo->findByParams(['session_id' =>$sessionId]);
+            $cart = $this->cartRepo->getListWhere(['session_id' =>$sessionId]);
         }
 
         if (empty($cart)) {
@@ -44,7 +44,7 @@ class CheckoutController extends Controller
 
         $total = $this->cartService->getCartTotal($cart);
 
-        $providers = $this->paymentProviderRepo->getListWhere(filters:['is_active' => 1]);
+        $providers = $this->paymentProviderRepo->getListWhere(filters:['is_enabled' => 1]);
 
         $this->renderWithFlash('checkout/index.html.twig', [
             'cart' => $cart,
@@ -65,11 +65,12 @@ class CheckoutController extends Controller
         $data = $this->only(['provider']);
 
         if ($userId) {
-            $cart = $this->cartRepo->findByParams(['user_id' =>$userId]);
+            $cart = $this->cartRepo->getListWhere(['user_id' =>$userId]);
         } else {
-            $cart = $this->cartRepo->findByParams(['session_id' =>$sessionId]);
+            $cart = $this->cartRepo->getListWhere(['session_id' =>$sessionId]);
         }
         $errors = $this->checkoutService->validateCheckoutData($cart, $data['provider'] ?? null);
+
         if (!empty($errors)) {
             $this->redirectWithError('/checkout', implode(', ', $errors));
             return;
@@ -82,7 +83,6 @@ class CheckoutController extends Controller
             'total' => $total,
             'cart' => $cart
         ];
-
         $this->redirect('/payment');
     }
 
@@ -106,6 +106,7 @@ class CheckoutController extends Controller
 
     public function success(): void
     {
+
         if (!isset($_SESSION['user_id'])) {
             $this->redirectWithError('/login', 'Please login to continue');
             return;
@@ -148,11 +149,7 @@ class CheckoutController extends Controller
 
             $db->commit();
             unset($_SESSION['checkout_data']);
-
-            $this->renderWithFlash('checkout/success.html.twig', [
-                'provider' => $checkoutData['provider'],
-                'total' => $checkoutData['total']
-            ]);
+            $this->renderWithFlash('checkout/success.html.twig');
 
         } catch (\Exception $e) {
             $db->rollBack();

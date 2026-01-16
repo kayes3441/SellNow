@@ -35,7 +35,7 @@ return function ($router) {
     $router->get('/checkout', 'CheckoutController@index');
     $router->post('/checkout/process', 'CheckoutController@process');
     $router->any('/payment', 'CheckoutController@payment');
-    $router->get('/checkout/success', 'CheckoutController@success');
+    $router->post('/checkout/success', 'CheckoutController@success');
 
     $router->get('/{username}', 'PublicController@profile');
 

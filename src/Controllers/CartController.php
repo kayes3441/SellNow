@@ -22,11 +22,10 @@ class CartController extends Controller
         $sessionId = session_id();
 
         if ($userId) {
-            $cart = $this->cartRepo->findByParams(['user_id' =>$userId]);
+            $cart = $this->cartRepo->getListWhere(filters:['user_id' =>$userId]);
         } else {
-            $cart = $this->cartRepo->findByParams(['session_id' =>$sessionId]);
+            $cart = $this->cartRepo->getListWhere(filters:['session_id' =>$sessionId]);
         }
-
         $total = $this->cartService->getCartTotal($cart);
 
         $this->renderWithFlash('cart/index.html.twig', [
@@ -38,7 +37,6 @@ class CartController extends Controller
     public function add(): void
     {
         $data = $this->only(['product_id', 'quantity']);
-
         if (empty($data['product_id'])) {
             $this->jsonError('Product ID is required', [], 400);
             return;
@@ -96,7 +94,7 @@ class CartController extends Controller
         } else {
             $cart = $this->cartRepo->findByParams(['session_id' =>$sessionId]);
         }
-        $this->cartRepo->delete($cart['id']);
+        $this->cartRepo->delete(id:$cart['id']);
         $this->redirectWithSuccess('/cart', 'Cart cleared successfully');
     }
 }

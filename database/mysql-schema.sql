@@ -1,3 +1,4 @@
+
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
    id INT AUTO_INCREMENT PRIMARY KEY,
@@ -5,8 +6,11 @@ CREATE TABLE users (
    username VARCHAR(50) NOT NULL,
    full_name VARCHAR(100),
    password VARCHAR(255) NOT NULL,
-   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+   UNIQUE INDEX idx_users_email (email),
+   INDEX idx_users_username (username)
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS products;
 CREATE TABLE products (
@@ -18,21 +22,28 @@ CREATE TABLE products (
   price DECIMAL(10,2),
   image_path VARCHAR(255),
   file_path VARCHAR(255),
-  is_active TINYINT(1) DEFAULT 1
+  is_active TINYINT(1) DEFAULT 1,
+
+  INDEX idx_products_user_id (user_id),
+  INDEX idx_products_slug (slug),
 
   CONSTRAINT products_user_id
       FOREIGN KEY (user_id)
-        REFERENCES users(id)
-);
+          REFERENCES users(id)
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS carts;
 CREATE TABLE carts (
    id INT AUTO_INCREMENT PRIMARY KEY,
-   session_id VARCHAR(255) NUll,
+   session_id VARCHAR(255) NULL,
    product_id INT,
    user_id INT,
    quantity INT DEFAULT 1,
-   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+   INDEX idx_carts_product_id (product_id),
+   INDEX idx_carts_user_id (user_id),
+   INDEX idx_carts_session_id (session_id),
 
    CONSTRAINT carts_product_id
        FOREIGN KEY (product_id)
@@ -42,9 +53,8 @@ CREATE TABLE carts (
    CONSTRAINT carts_user_id
        FOREIGN KEY (user_id)
            REFERENCES users(id)
-           ON DELETE CASCADE,
-);
-
+           ON DELETE CASCADE
+) ENGINE=InnoDB;
 DROP TABLE IF EXISTS orders;
 CREATE TABLE orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -54,25 +64,32 @@ CREATE TABLE orders (
     payment_provider VARCHAR(50),
     payment_status VARCHAR(20),
     transaction_id VARCHAR(100),
-    order_date DATETIME DEFAULT CURRENT_TIMESTAMP
+    order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
 
+    INDEX idx_orders_user_id (user_id),
+    INDEX idx_orders_product_id (product_id),
+    INDEX idx_orders_payment_status (payment_status),
+    INDEX idx_orders_transaction_id (transaction_id),
 
     CONSTRAINT orders_product_id
         FOREIGN KEY (product_id)
-           REFERENCES products(id)
-           ON DELETE CASCADE,
+            REFERENCES products(id)
+            ON DELETE CASCADE,
 
     CONSTRAINT orders_user_id
         FOREIGN KEY (user_id)
             REFERENCES users(id)
-            ON DELETE CASCADE,
-);
+            ON DELETE CASCADE
+) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS payment_providers;
 CREATE TABLE payment_providers (
-   id INT AUTO_INCREMENT PRIMARY KEY,
-   provider_name VARCHAR(50),
-   api_key VARCHAR(255),
-   api_secret VARCHAR(255),
-   is_enabled TINYINT(1)
-);
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    provider_name VARCHAR(50),
+    api_key VARCHAR(255),
+    api_secret VARCHAR(255),
+    is_enabled TINYINT(1),
+
+    INDEX idx_payment_providers_provider_name (provider_name),
+    INDEX idx_payment_providers_is_enabled (is_enabled)
+) ENGINE=InnoDB;

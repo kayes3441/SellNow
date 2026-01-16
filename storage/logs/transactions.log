@@ -1,2 +1,12 @@
 2026-01-13 09:06:25 - Order processed via Stripe - User: 1
 2026-01-13 09:11:19 - Order processed via PayPal - User: 1
+[2026-01-16 14:38:58] Transaction: TXN-696A4D82E526B-1768574338 | Provider: 1 | User: 1 | Amount: $15.00
+[2026-01-16 14:38:58] Transaction: TXN-696A4D82EC223-1768574338 | Provider: 1 | User: 1 | Amount: $50.00
+[2026-01-16 14:39:28] Transaction: TXN-696A4DA07B9F2-1768574368 | Provider: 1 | User: 1 | Amount: $15.00
+[2026-01-16 14:39:28] Transaction: TXN-696A4DA07E1CB-1768574368 | Provider: 1 | User: 1 | Amount: $50.00
+[2026-01-16 14:42:04] Transaction: TXN-696A4E3C35564-1768574524 | Provider: 1 | User: 1 | Amount: $15.00
+[2026-01-16 14:42:04] Transaction: TXN-696A4E3C36FEE-1768574524 | Provider: 1 | User: 1 | Amount: $50.00
+[2026-01-16 14:42:35] Transaction: TXN-696A4E5B66047-1768574555 | Provider: 1 | User: 1 | Amount: $15.00
+[2026-01-16 14:42:35] Transaction: TXN-696A4E5B675BA-1768574555 | Provider: 1 | User: 1 | Amount: $50.00
+[2026-01-16 14:43:44] Transaction: TXN-696A4EA06ED0C-1768574624 | Provider: 1 | User: 1 | Amount: $15.00
+[2026-01-16 14:43:44] Transaction: TXN-696A4EA0717FF-1768574624 | Provider: 1 | User: 1 | Amount: $50.00

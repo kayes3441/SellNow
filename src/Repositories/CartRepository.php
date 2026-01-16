@@ -27,7 +27,7 @@ class CartRepository implements CartRepositoryInterface
 
     public function getListWhere(array $orderBy = [], string $searchValue = null, array $filters = [], array $relations = []): ?array
     {
-       return $this->cart->whereUsingArray($filters);
+        return $this->cart->join('products', 'product_id', 'id', $filters, 'LEFT');
     }
 
     public function add(array $data): string

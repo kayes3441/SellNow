@@ -124,6 +124,40 @@ abstract class Model
         return (int) $result['count'];
     }
 
+    /**
+     * Join with another table
+     * 
+     * @param string $joinTable Table to join with
+     * @param string $foreignKey Foreign key in current table
+     * @param string $primaryKey Primary key in join table
+     * @param array $conditions WHERE conditions ['column' => 'value']
+     * @param string $joinType Type of join (INNER, LEFT, RIGHT)
+     * @return array
+     */
+    public static function join(string $joinTable, string $foreignKey, string $primaryKey = 'id', array $conditions = [], string $joinType = 'INNER'): array
+    {
+        $instance = new static();
+        $mainTable = static::$table;
+        
+        $sql = "SELECT {$mainTable}.*, {$joinTable}.* 
+                FROM {$mainTable} 
+                {$joinType} JOIN {$joinTable} ON {$mainTable}.{$foreignKey} = {$joinTable}.{$primaryKey}";
+        
+        $params = [];
+        if (!empty($conditions)) {
+            $whereClauses = [];
+            foreach ($conditions as $column => $value) {
+                $whereClauses[] = "{$mainTable}.{$column} = ?";
+                $params[] = $value;
+            }
+            $sql .= " WHERE " . implode(' AND ', $whereClauses);
+        }
+        
+        $stmt = $instance->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     // Instance methods (for backward compatibility)
     public function update(int $id, array $data): bool
     {

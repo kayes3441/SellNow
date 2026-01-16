@@ -3,14 +3,14 @@
 {% block content %}
 <div class="row justify-content-center mt-5">
     <div class="col-md-6 text-center">
-        <h3>Connected to {{ provider }}...</h3>
+        <h3>Connected to {{ provider['provider_name'] }}...</h3>
         <div class="spinner-border text-primary my-4" role="status" style="width: 3rem; height: 3rem;">
             <span class="visually-hidden">Loading...</span>
         </div>
         <p>Please wait while we process your payment of <strong>${{ total }}</strong></p>
         
         <form id="payment-form" action="/checkout/success" method="POST">
-            <input type="hidden" name="provider" value="{{ provider }}">
+            <input type="hidden" name="provider" value="{{ provider['id'] }}">
             <button type="submit" class="btn btn-primary mt-3" id="confirm-btn" style="display:none;">Confirm Payment</button>
         </form>
     </div>
