@@ -43,3 +43,81 @@ A platform where:
 - `database/`: Schema and SQLite file.
 
 Good luck!
+
+
+## Docker Setup
+
+### Services
+- **nginx** (port 8082) - Web server
+- **php-fpm** - PHP processor
+- **mysql** (port 3307) - Database
+- **phpmyadmin** (port 8081) - DB management
+
+### Commands
+```bash
+# Start services
+docker-compose up -d
+ 
+ 
+```
+## Database Schema
+### Using MySQL
+#### Add indexing and foreign keys, and fix the casing as well.
+
+###  Router (`src/Config/Router.php`)
+
+- Custom routing system with Controller@method syntax
+- Supports GET, POST, ANY methods
+- Dynamic route parameters: `/{username}`
+- Integrated with Container for dependency injection
+
+###  Container (`src/Container.php`)
+- Dependency injection container
+- Auto-resolves constructor dependencies using Reflection
+- Binds interfaces to concrete implementations
+- Singleton pattern for shared instances
+
+### Repositories
+**Location:** `src/Repositories/`
+
+**Purpose:** Data access layer - handles all database operations
+
+**Interface:** `src/Contracts/RepositoryInterface.php`
+- `findById()`
+- `findByParams()`
+- `getListWhere()`
+- `add()`
+- `update()`
+- `delete()`
+
+**Implemented Repositories:**
+- `AuthRepository`
+- `UserRepository`
+- `ProductRepository`
+- `CartRepository` 
+- `OrderRepository`
+- `PaymentProviderRepository` 
+
+### Services
+**Location:** `src/Services/`
+
+###  Models
+**Location:** `src/Models/`
+
+**Base Model** (`Model.php`):
+- Static methods for Eloquent-style queries
+- `find()`, `findBy()`, `all()`, `where()`, `create()`, `updateById()`, `destroy()`
+- `join()` - Common JOIN method for relations
+- `query()` - Raw SQL execution
+
+**Implemented Models:**
+- `User`
+- `Product`
+- `Cart`
+- `Order`
+- `PaymentProvider`
+ 
+
+### Traits
+
+#### `HandlesResponse` (`src/Traits/HandlesResponse.php`)
