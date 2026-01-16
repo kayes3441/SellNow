@@ -2,53 +2,72 @@
 
 namespace SellNow\Controllers;
 
+use SellNow\Contracts\ProductRepositoryInterface;
+use SellNow\Services\ProductService;
+
 class ProductController extends Controller
 {
-    public function create()
+    public function __construct(
+        public ProductRepositoryInterface $productRepo,
+        public ProductService $productService,
+    )
+    {
+
+    }
+    public function create(): void
     {
         if (!isset($_SESSION['user_id'])) {
-            $this->redirect('/login');
+            $this->redirectWithError('/login', 'Please login to continue');
+            return;
         }
-        $this->render('products/add.html.twig');
+        
+        $this->renderWithFlash('products/add.html.twig');
     }
 
-    public function store()
+    public function store(): void
     {
-        if (!isset($_SESSION['user_id']))
-            die("Unauthorized");
+        if (!isset($_SESSION['user_id'])) {
+            $this->redirectWithError('/login', 'Please login to continue');
+            return;
+        }
 
-        $title = $_POST['title'];
-        $price = $_POST['price'];
-        $slug = strtolower(str_replace(' ', '-', $title)) . '-' . rand(1000, 9999);
+        $data = $this->only(['title', 'price', 'description']);
 
+        $errors = $this->productService->validateProductData($data);
+        if (!empty($errors)) {
+            $errorMessage = implode(', ', $errors);
+            $this->redirectWithError('/products/create', $errorMessage);
+            return;
+        }
         $uploadDir = __DIR__ . '/../../public/uploads/';
-
-        $imagePath = '';
-        if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-            $name = time() . '_' . $_FILES['image']['name'];
-            move_uploaded_file($_FILES['image']['tmp_name'], $uploadDir . $name);
-            $imagePath = 'uploads/' . $name;
+        
+        $imagePath = null;
+        if (isset($_FILES['image'])) {
+            $imagePath = $this->productService->handleFileUpload($_FILES['image'], $uploadDir);
         }
 
-        $filePath = '';
-        if (isset($_FILES['product_file']['error']) && $_FILES['product_file']['error'] == 0) {
-            $name = time() . '_dl_' . $_FILES['product_file']['name'];
-            move_uploaded_file($_FILES['product_file']['tmp_name'], $uploadDir . $name);
-            $filePath = 'uploads/' . $name;
+        $filePath = null;
+        if (isset($_FILES['product_file'])) {
+            $filePath = $this->productService->handleFileUpload($_FILES['product_file'], $uploadDir, 'dl_');
+        }
+        if (!$filePath) {
+            $this->redirectWithError('/products/create', 'Product file is required');
+            return;
         }
 
-        // Raw SQL
-        $sql = "INSERT INTO products (user_id, title, slug, price, image_path, file_path) VALUES (?, ?, ?, ?, ?, ?)";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([
-            $_SESSION['user_id'],
-            $title,
-            $slug,
-            $price,
-            $imagePath,
-            $filePath
-        ]);
+        try {
+            $productData = $this->productService->getProductData(
+                $data,
+                $_SESSION['user_id'],
+                $imagePath,
+                $filePath
+            );
 
-        $this->redirect('/dashboard');
+             $this->productRepo->add($productData);
+
+            $this->redirectWithSuccess('/dashboard', 'Product created successfully!');
+        } catch (\Exception $e) {
+            $this->redirectWithError('/products/create', 'Failed to create product. Please try again.');
+        }
     }
 }
